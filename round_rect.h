@@ -5,7 +5,7 @@
 #include <cmath>
 
 struct  Rectangle : public sf::ConvexShape {
-    Rectangle(const sf::FloatRect rt, const float rs)
+    Rectangle(const sf::FloatRect rt = sf::FloatRect (0.f,0.f,0.f,0.f), const float rs = 0.f)
         : rect(rt), radius(rs) {
         init();
         setPosition(rt.left, rt.top);
