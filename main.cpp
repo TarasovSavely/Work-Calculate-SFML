@@ -14,16 +14,16 @@
 bool get_name (); // Получает имя окна в фокусе, записывает результат в переменную name
 void processing_events (); // Обработка событий
 void redraw_win (); // Вывод в дисплей
-std::string calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
+std::wstring calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
 bool find_str (wchar_t *str, wchar_t *f_str); // Ищет в строке-аргументе 1, строку-аргумент два
-int8_t find_win (std::string &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
+int8_t find_win (std::wstring &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
 void question (); // Выводит вопрос о добвалении ока в какую-либо группу
 
 Window rwin;
 Window pwin;
 Display *disp;
 
-std::string name;
+std::wstring name;
 
 time_t tmr, l_tmr;
 
@@ -36,7 +36,7 @@ time_t t_work = 0, t_rest = 0, t_other = 0;
 int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
 
-std::vector <std::string> list_of_name_win; // Лист имен окон
+std::vector <std::wstring> list_of_name_win; // Лист имен окон
 std::vector <int8_t> list_of_state_win; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
 
 int main(void) {
@@ -87,7 +87,7 @@ bool get_name() {
 
     Window get_focus;
     int state_win;
-    char** names;
+    wchar_t** names;
 
     XGetInputFocus (disp, &get_focus, &state_win);
 
@@ -96,12 +96,12 @@ bool get_name() {
 
     if (state_win == 1) {
         if (XGetWMName(disp, get_focus, &name)) {
-            if (XmbTextPropertyToTextList (disp, &name, &names, &count)>=0) {
+            if (XwcTextPropertyToTextList (disp, &name, &names, &count)>=0) {
                 if (count) {
                     ::name = names[0];
                     ret = true;
                 }
-                XFreeStringList (names);
+                XwcFreeStringList (names);
             }
         }
     } else if (state_win == 2) {
@@ -111,12 +111,12 @@ bool get_name() {
         XQueryTree(disp, get_focus, &rwin, &pwin, &cwins, &count2);
 
         if (XGetWMName(disp, pwin, &name)) {
-            if (XmbTextPropertyToTextList (disp, &name, &names, &count)>=0) {
+            if (XwcTextPropertyToTextList (disp, &name, &names, &count)>=0) {
                 if (count) {
                     ::name = names[0];
                     ret=true;
                 }
-                XFreeStringList (names);
+                XwcFreeStringList (names);
             }
         }
 
@@ -166,8 +166,8 @@ void redraw_win () {
 
     window.clear(sf::Color (255,255,255));
 
-    std::string str = "Working time: ";
-    str = str + std::to_string (t_work/3600) +":"+std::to_string ((t_work%3600) / 60)+":"+std::to_string (t_work%60) + " (" + calc_percent(t_work) + ")";
+    std::wstring str = L"Working time: ";
+    str = str + std::to_wstring (t_work/3600) +L":"+std::to_wstring ((t_work%3600) / 60)+L":"+std::to_wstring (t_work%60) + L" (" + calc_percent(t_work) + L")";
 
     work.setFont(font);
     work.setString(str);
@@ -176,8 +176,8 @@ void redraw_win () {
     work.setStyle(sf::Text::Bold | sf::Text::Italic);
     work.setPosition(sf::Vector2f (10.f,10.f));
 
-    str = "Rest time: ";
-    str = str + std::to_string (t_rest/3600) +":"+std::to_string ((t_rest%3600) / 60)+":"+std::to_string (t_rest%60) + " (" + calc_percent(t_rest) + ")";
+    str = L"Rest time: ";
+    str = str + std::to_wstring (t_rest/3600) +L":"+std::to_wstring ((t_rest%3600) / 60)+L":"+std::to_wstring (t_rest%60) + L" (" + calc_percent(t_rest) + L")";
 
     rest.setFont(font);
     rest.setString(str);
@@ -186,8 +186,8 @@ void redraw_win () {
     rest.setStyle(sf::Text::Bold | sf::Text::Italic);
     rest.setPosition(sf::Vector2f (10.f,40.f));
 
-    str = "Other time: ";
-    str = str + std::to_string (t_other/3600) +":"+std::to_string ((t_other%3600) / 60)+":"+std::to_string (t_other%60) + " (" + calc_percent(t_other) + ")";;
+    str = L"Other time: ";
+    str = str + std::to_wstring (t_other/3600) +L":"+std::to_wstring ((t_other%3600) / 60)+L":"+std::to_wstring (t_other%60) + L" (" + calc_percent(t_other) + L")";;
 
     other.setFont(font);
     other.setString(str);
@@ -203,12 +203,12 @@ void redraw_win () {
     window.display();
 }
 
-std::string calc_percent (time_t val) {
+std::wstring calc_percent (time_t val) {
     if (t_other+t_rest+t_work) {
         int ret = ((float)val/((float)t_other+t_rest+t_work))*1000.0;
-        return std::to_string (ret/10) + "." + std::to_string (ret%10) + "%";
+        return std::to_wstring (ret/10) + L"." + std::to_wstring (ret%10) + L"%";
     } else {
-        return "0.0%";
+        return L"0.0%";
     }
 }
 
@@ -232,7 +232,7 @@ bool find_str (wchar_t *str, wchar_t *f_str) {
     return false;
 }
 
-int8_t find_win (std::string &name) {
+int8_t find_win (std::wstring &name) {
     for (size_t i = 0; i<list_of_name_win.size (); i++) {
         if (list_of_name_win [i] == name) {
             return list_of_state_win [i];
@@ -296,7 +296,7 @@ void question () {
 
     while (que_win.isOpen()) {
         que_win.clear (sf::Color::White);
-        // (стоп-таймер, прочее, отдых, работа)
+
         if (btn_work.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(3);
             que_win.close ();
