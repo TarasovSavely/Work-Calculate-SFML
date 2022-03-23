@@ -30,7 +30,8 @@ sf::Font font;
 
 time_t t_work = 0, t_rest = 0, t_other = 10;
 
-int m_x,m_y; bool m_pr; // Мышь, x, y, pressed
+int m_x,m_y;
+bool m_pr; // Мышь, x, y, pressed
 
 int main(void) {
     window.create (sf::VideoMode(382, 110), "Work calculate", sf::Style::Default^sf::Style::Resize); // Создаем окно
@@ -174,8 +175,10 @@ void redraw_win () {
     other.setStyle(sf::Text::Bold | sf::Text::Italic);
     other.setPosition(sf::Vector2f (10.f,70.f));
 
-    Button btn (work.getGlobalBounds(),3.f,sf::Color (0,100,10));
-    btn.is_pressed(m_x,m_y, m_pr);
+    Button btn (work.getGlobalBounds(),3.f,sf::Color (255,223,0));
+    btn.set_shadow();
+    btn.set_multicolor(sf::Color (255.0/1.5, 223.0/1.5, 0), sf::Color (225/3, 223/3, 0));
+    std::cout<<btn.is_pressed(m_x,m_y, m_pr)<<std::endl;
     btn.draw(window);
 
     window.draw (work);

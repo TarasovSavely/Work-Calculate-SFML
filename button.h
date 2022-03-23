@@ -41,10 +41,10 @@ public:
         } else {
             rect.setFillColor (col1);
         }
-        window.draw (rect);
         if (shadow) {
             window.draw (sh_shadow);
         }
+        window.draw (rect);
     }
 
     // Включить режим multicolor, т.е. отдельные цвета для кнопки при:
@@ -61,7 +61,7 @@ public:
     }
 
     // Включить отображение тени от кнопки (цвет тени, смещение тени относительно тела кнопки)
-    void set_shadow (sf::Color color_shadow = sf::Color (100,100,100,100), float offs_x = 5.f, float offs_y = 5.f) {
+    void set_shadow (sf::Color color_shadow = sf::Color (100,100,100,100), float offs_x = 3.f, float offs_y = 3.f) {
         shadow = true;
 
         sh_shadow = rect;
