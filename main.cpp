@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 #include <ctime>
+#include <vector>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -14,24 +16,27 @@ void processing_events (); // Обработка событий
 void redraw_win (); // Вывод в дисплей
 std::string calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
 bool find_str (wchar_t *str, wchar_t *f_str); // Ищет в строке-аргументе 1, строку-аргумент два
+int8_t find_win (std::string &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
 
 Window rwin;
 Window pwin;
 Display *disp;
 
-wchar_t name [500];
+std::string name;
 
-time_t tmr;
-tm *loctime;
+time_t tmr, l_tmr;
 
 sf::RenderWindow window;
 
 sf::Font font;
 
-time_t t_work = 0, t_rest = 0, t_other = 10;
+time_t t_work = 0, t_rest = 0, t_other = 0;
 
 int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
+
+std::vector <std::string> list_of_name_win {"TODO_Program_SFML","Work calculate"}; // Лист имен окон
+std::vector <int8_t> list_of_state_win {1,1}; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
 
 int main(void) {
     window.create (sf::VideoMode(382, 110), "Work calculate", sf::Style::Default^sf::Style::Resize); // Создаем окно
@@ -46,9 +51,23 @@ int main(void) {
     disp = XOpenDisplay(NULL); // Устанавливаем связь с X-сервером
 
     while (window.isOpen()) {
-        if (get_name ()) { // Получаем имя окна в фокусе
-            tmr = time(NULL);
-            //std::wcout<<name<<std::endl;
+
+        tmr = time(NULL);
+        if (tmr!=l_tmr && get_name ()) { // Получаем имя окна в фокусе
+            l_tmr = tmr;
+            switch (find_win(name)) {
+            case 1:
+                ++t_other;
+                break;
+            case 2:
+                ++t_rest;
+                break;
+            case 3:
+                ++t_work;
+                break;
+            case -1:
+                break;
+            }
         }
         redraw_win ();
         processing_events();
@@ -66,7 +85,7 @@ bool get_name() {
 
     Window get_focus;
     int state_win;
-    wchar_t** names;
+    char** names;
 
     XGetInputFocus (disp, &get_focus, &state_win);
 
@@ -75,12 +94,12 @@ bool get_name() {
 
     if (state_win == 1) {
         if (XGetWMName(disp, get_focus, &name)) {
-            if (XwcTextPropertyToTextList (disp, &name, &names, &count)>=0) {
+            if (XmbTextPropertyToTextList (disp, &name, &names, &count)>=0) {
                 if (count) {
-                    wcscpy(::name,names[0]);
+                    ::name = names[0];
                     ret = true;
                 }
-                XwcFreeStringList (names);
+                XFreeStringList (names);
             }
         }
     } else if (state_win == 2) {
@@ -90,12 +109,12 @@ bool get_name() {
         XQueryTree(disp, get_focus, &rwin, &pwin, &cwins, &count2);
 
         if (XGetWMName(disp, pwin, &name)) {
-            if (XwcTextPropertyToTextList (disp, &name, &names, &count)>=0) {
+            if (XmbTextPropertyToTextList (disp, &name, &names, &count)>=0) {
                 if (count) {
-                    wcscpy(::name,names[0]);
+                    ::name = names[0];
                     ret=true;
                 }
-                XwcFreeStringList (names);
+                XFreeStringList (names);
             }
         }
 
@@ -216,4 +235,14 @@ bool find_str (wchar_t *str, wchar_t *f_str) {
     }
     return false;
 }
+
+int8_t find_win (std::string &name) {
+    for (size_t i = 0; i<list_of_name_win.size (); i++) {
+        if (list_of_name_win [i] == name) {
+            return list_of_state_win [i];
+        }
+    }
+    return -1;
+}
+
 
