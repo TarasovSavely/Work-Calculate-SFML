@@ -20,7 +20,7 @@ public:
 
     // Нажата ли кнопка (x мыши, y мыши, нажата ли кнопка мыши)
     bool is_pressed (int x, int y, bool pr_btn) {
-        press = rect.rect.contains (x,y) + pr_btn&&rect.rect.contains (x,y);;
+        press = rect.rect.contains (x,y) + (pr_btn&&rect.rect.contains (x,y));
         return press==2;
     }
 
