@@ -196,12 +196,6 @@ void redraw_win () {
     other.setStyle(sf::Text::Bold | sf::Text::Italic);
     other.setPosition(sf::Vector2f (10.f,70.f));
 
-    Button btn (work.getGlobalBounds(),3.f,sf::Color (255,223,0));
-    btn.set_shadow();
-    btn.set_multicolor(sf::Color (255.0/1.5, 223.0/1.5, 0), sf::Color (225/3, 223/3, 0));
-    std::cout<<btn.is_pressed(m_x,m_y, m_pr)<<std::endl;
-    btn.draw(window);
-
     window.draw (work);
     window.draw (rest);
     window.draw (other);
@@ -252,7 +246,7 @@ void question () {
     window.setFramerateLimit(120);
 
     sf::Text txt;
-    int m_x, m_y, m_pr;
+    int m_x = 0, m_y = 0, m_pr = 0;
 
     list_of_name_win.push_back(name);
 
@@ -262,8 +256,9 @@ void question () {
         name.resize(11);
         large = true;
     }
-    txt.setString("The \"" + name + (large?"...":"") + "\" window is not assigned to any group.\n\r"
-                  "Which group should he be assigned to?");
+    std::wstring str = L"The \"" + std::wstring(name.begin(), name.end()) + (large?L"...":L"") + L"\" window is not assigned to any group.\n\r"
+                  "Which group should he be assigned to?";
+    txt.setString (str.c_str());
     txt.setCharacterSize(14);
     txt.setFillColor(sf::Color (0,0,0));
     txt.setPosition(sf::Vector2f (10.f,10.f));
@@ -296,7 +291,7 @@ void question () {
 
     Button btn_work (text_work.getGlobalBounds(),5.f,sf::Color (10,245,10)),
            btn_rest (text_rest.getGlobalBounds(),5.f,sf::Color (245,10,10)),
-           btn_other(text_other.getGlobalBounds(),5.f,sf::Color (0,0,150)),
+           btn_other(text_other.getGlobalBounds(),5.f,sf::Color (117,187,253)),
            btn_stoptimer(text_StopTimer.getGlobalBounds(),5.f,sf::Color (255,223,0));
 
     while (que_win.isOpen()) {

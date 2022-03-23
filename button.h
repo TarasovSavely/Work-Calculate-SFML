@@ -14,7 +14,12 @@ private:
 
 public:
     // Конструктор: прямоугольник, скругление, цвет обычный
-    Button (sf::FloatRect rc, float r, sf::Color color) : rect (rc,r) {
+    Button (sf::FloatRect rc, float r, sf::Color color) {
+        rc.left -= 3; // Т.к. первый аргумент зачастую это результат работы функции
+        rc.top -=3;   // getGlobalBounds, применяемой к тесту, то эти строки
+        rc.width += 6; // позволяют сделать кнопку более "простороной"
+        rc.height += 6; // и более красивой
+        rect = Rectangle (rc,r);
         col1 = color;
     }
 
