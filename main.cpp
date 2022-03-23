@@ -45,7 +45,7 @@ int main(void) {
     while (window.isOpen()) {
         if (get_name ()) { // Получаем имя окна в фокусе
             tmr = time(NULL);
-            std::wcout<<name<<std::endl;
+            //std::wcout<<name<<std::endl;
         }
         redraw_win ();
         processing_events();
@@ -123,12 +123,10 @@ void processing_events () {
     }
 }
 
-//Button btn;
-
 void redraw_win () {
     sf::Text work, rest, other;
 
-    window.clear(sf::Color (10,25,40));
+    window.clear(sf::Color (255,255,255));
 
     std::string str = "Working time: ";
     str = str + std::to_string (t_work/3600) +":"+std::to_string ((t_work%3600) / 60)+":"+std::to_string (t_work%60) + " (" + calc_percent(t_work) + ")";
@@ -136,7 +134,7 @@ void redraw_win () {
     work.setFont(font);
     work.setString(str);
     work.setCharacterSize(25);
-    work.setFillColor(sf::Color (0,250,0));
+    work.setFillColor(sf::Color (20,215,20));
     work.setStyle(sf::Text::Bold | sf::Text::Italic);
     work.setPosition(sf::Vector2f (10.f,10.f));
 
@@ -146,7 +144,7 @@ void redraw_win () {
     rest.setFont(font);
     rest.setString(str);
     rest.setCharacterSize(25);
-    rest.setFillColor(sf::Color (250,0,0));
+    rest.setFillColor(sf::Color (235,10,10));
     rest.setStyle(sf::Text::Bold | sf::Text::Italic);
     rest.setPosition(sf::Vector2f (10.f,40.f));
 
@@ -156,14 +154,16 @@ void redraw_win () {
     other.setFont(font);
     other.setString(str);
     other.setCharacterSize(25);
-    other.setFillColor(sf::Color(0,0,250));
+    other.setFillColor(sf::Color(30,0,245));
     other.setStyle(sf::Text::Bold | sf::Text::Italic);
     other.setPosition(sf::Vector2f (10.f,70.f));
+
+    Button btn (work.getGlobalBounds(),3.f,sf::Color (0,100,10));
+    btn.draw(window);
 
     window.draw (work);
     window.draw (rest);
     window.draw (other);
-
 
     window.display();
 }

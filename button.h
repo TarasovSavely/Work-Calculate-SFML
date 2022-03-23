@@ -14,7 +14,7 @@ private:
 
 public:
     // Конструктор: прямоугольник, скругление, цвет обычный
-    Button (sf::FloatRect rc, float r, sf::Color color) {
+    Button (sf::FloatRect rc, float r, sf::Color color) : rect (rc,r) {
         col1 = color;
     }
 
