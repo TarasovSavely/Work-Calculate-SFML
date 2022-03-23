@@ -5,6 +5,7 @@
 #include <string>
 #include <ctime>
 #include <vector>
+#include <unistd.h>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -36,12 +37,19 @@ time_t t_work = 0, t_rest = 0, t_other = 0;
 int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
 
-std::vector <std::wstring> list_of_name_win; // Лист имен окон
-std::vector <int8_t> list_of_state_win; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
+std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calculate"}; // Лист имен окон
+std::vector <int8_t> list_of_state_win {0,0}; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
+
+int handler (_XDisplay *d, XErrorEvent *ds) {
+    std::cout<<"Xerror"<<std::endl;
+return 0;
+}
 
 int main(void) {
     window.create (sf::VideoMode(382, 110), "Work calculate", sf::Style::Default^sf::Style::Resize); // Создаем окно
     window.setFramerateLimit(120);
+
+    XSetErrorHandler(handler);
 
     if (!font.loadFromFile("font.ttf")) {
         std::cout<<"Font not found. Please, read README file."<<std::endl;
@@ -54,7 +62,9 @@ int main(void) {
     while (window.isOpen()) {
 
         tmr = time(NULL);
+
         if (tmr!=l_tmr && get_name ()) { // Получаем имя окна в фокусе
+            std::wcout<<name.c_str()<<std::endl;
             l_tmr = tmr;
             switch (find_win(name)) {
             case 1:
@@ -71,6 +81,7 @@ int main(void) {
                 break;
             }
         }
+
         redraw_win ();
         processing_events();
     }
@@ -82,6 +93,7 @@ int main(void) {
 }
 
 bool get_name() {
+    std::cout<<"I (get_name) start"<<std::endl;
 
     bool ret = false;
 
@@ -125,6 +137,7 @@ bool get_name() {
         std::cout<<"ERR1"<<std::endl;
     }
 
+    std::cout<<"I (get_name) return " << (ret?"true.":"false.") << std::endl;
     return ret;
 }
 
@@ -257,7 +270,7 @@ void question () {
         large = true;
     }
     std::wstring str = L"The \"" + std::wstring(name.begin(), name.end()) + (large?L"...":L"") + L"\" window is not assigned to any group.\n\r"
-                  "Which group should he be assigned to?";
+                       "Which group should he be assigned to?";
     txt.setString (str.c_str());
     txt.setCharacterSize(14);
     txt.setFillColor(sf::Color (0,0,0));
@@ -300,21 +313,25 @@ void question () {
         if (btn_work.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(3);
             que_win.close ();
+            usleep (1000);
             return;
         }
         if (btn_rest.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(2);
             que_win.close ();
+            usleep (1000);
             return;
         }
         if (btn_stoptimer.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(0);
             que_win.close ();
+            usleep (1000);
             return;
         }
         if (btn_other.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(1);
             que_win.close ();
+            usleep (1000);
             return;
         }
 
@@ -336,6 +353,7 @@ void question () {
             case sf::Event::Closed:
                 list_of_state_win.push_back(0);
                 que_win.close ();
+                usleep (1000);
                 break;
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left) {
