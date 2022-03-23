@@ -17,6 +17,7 @@ void redraw_win (); // Вывод в дисплей
 std::string calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
 bool find_str (wchar_t *str, wchar_t *f_str); // Ищет в строке-аргументе 1, строку-аргумент два
 int8_t find_win (std::string &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
+void question (); // Выводит вопрос о добвалении ока в какую-либо группу
 
 Window rwin;
 Window pwin;
@@ -35,8 +36,8 @@ time_t t_work = 0, t_rest = 0, t_other = 0;
 int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
 
-std::vector <std::string> list_of_name_win {"TODO_Program_SFML","Work calculate"}; // Лист имен окон
-std::vector <int8_t> list_of_state_win {1,1}; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
+std::vector <std::string> list_of_name_win; // Лист имен окон
+std::vector <int8_t> list_of_state_win; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
 
 int main(void) {
     window.create (sf::VideoMode(382, 110), "Work calculate", sf::Style::Default^sf::Style::Resize); // Создаем окно
@@ -66,6 +67,7 @@ int main(void) {
                 ++t_work;
                 break;
             case -1:
+                question ();
                 break;
             }
         }
@@ -137,7 +139,7 @@ void processing_events () {
             window.setFramerateLimit(10);
             break;
         case sf::Event::GainedFocus:
-            window.setFramerateLimit(600);
+            window.setFramerateLimit(120);
             break;
         case sf::Event::MouseButtonPressed:
             if (event.mouseButton.button == sf::Mouse::Left) {
@@ -245,4 +247,120 @@ int8_t find_win (std::string &name) {
     return -1;
 }
 
+void question () {
+    sf::RenderWindow que_win (sf::VideoMode(390, 75), "Question", sf::Style::Default^sf::Style::Resize);
+    window.setFramerateLimit(120);
+
+    sf::Text txt;
+    int m_x, m_y, m_pr;
+
+    list_of_name_win.push_back(name);
+
+    txt.setFont(font);
+    bool large = false;
+    if (name.size ()>11) {
+        name.resize(11);
+        large = true;
+    }
+    txt.setString("The \"" + name + (large?"...":"") + "\" window is not assigned to any group.\n\r"
+                  "Which group should he be assigned to?");
+    txt.setCharacterSize(14);
+    txt.setFillColor(sf::Color (0,0,0));
+    txt.setPosition(sf::Vector2f (10.f,10.f));
+
+    sf::Text text_work, text_rest, text_other, text_StopTimer;
+
+    text_work.setFont(font);
+    text_work.setString("Work");
+    text_work.setCharacterSize(17);
+    text_work.setFillColor(sf::Color(0,0,0));
+    text_work.setPosition(sf::Vector2f (10.f,48.f));
+
+    text_rest.setFont(font);
+    text_rest.setString("Rest");
+    text_rest.setCharacterSize(17);
+    text_rest.setFillColor(sf::Color(0,0,0));
+    text_rest.setPosition(sf::Vector2f (70.f,48.f));
+
+    text_other.setFont(font);
+    text_other.setString("Other");
+    text_other.setCharacterSize(17);
+    text_other.setFillColor(sf::Color(0,0,0));
+    text_other.setPosition(sf::Vector2f (130.f,48.f));
+
+    text_StopTimer.setFont(font);
+    text_StopTimer.setString("Stop-Timer");
+    text_StopTimer.setCharacterSize(17);
+    text_StopTimer.setFillColor(sf::Color(0,0,0));
+    text_StopTimer.setPosition(sf::Vector2f (200.f,48.f));
+
+    Button btn_work (text_work.getGlobalBounds(),5.f,sf::Color (10,245,10)),
+           btn_rest (text_rest.getGlobalBounds(),5.f,sf::Color (245,10,10)),
+           btn_other(text_other.getGlobalBounds(),5.f,sf::Color (0,0,150)),
+           btn_stoptimer(text_StopTimer.getGlobalBounds(),5.f,sf::Color (255,223,0));
+
+    while (que_win.isOpen()) {
+        que_win.clear (sf::Color::White);
+        // (стоп-таймер, прочее, отдых, работа)
+        if (btn_work.is_pressed(m_x,m_y,m_pr)) {
+            list_of_state_win.push_back(3);
+            que_win.close ();
+            return;
+        }
+        if (btn_rest.is_pressed(m_x,m_y,m_pr)) {
+            list_of_state_win.push_back(2);
+            que_win.close ();
+            return;
+        }
+        if (btn_stoptimer.is_pressed(m_x,m_y,m_pr)) {
+            list_of_state_win.push_back(0);
+            que_win.close ();
+            return;
+        }
+        if (btn_other.is_pressed(m_x,m_y,m_pr)) {
+            list_of_state_win.push_back(1);
+            que_win.close ();
+            return;
+        }
+
+        btn_work.draw(que_win);
+        btn_rest.draw(que_win);
+        btn_stoptimer.draw(que_win);
+        btn_other.draw(que_win);
+
+        que_win.draw (txt);
+        que_win.draw (text_work);
+        que_win.draw (text_rest);
+        que_win.draw (text_other);
+        que_win.draw (text_StopTimer);
+        que_win.display ();
+
+        sf::Event event;
+        while (que_win.pollEvent(event)) {
+            switch (event.type) {
+            case sf::Event::Closed:
+                list_of_state_win.push_back(0);
+                que_win.close ();
+                break;
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    m_pr = true;
+                }
+                break;
+            case sf::Event::MouseButtonReleased:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    m_pr = false;
+                }
+                break;
+            case sf::Event::MouseMoved:
+                m_x = event.mouseMove.x;
+                m_y = event.mouseMove.y;
+                break;
+            default:
+                break;
+            }
+        }
+
+    }
+}
 

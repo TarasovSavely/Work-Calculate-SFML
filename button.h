@@ -8,7 +8,7 @@ private:
     Rectangle rect, sh_shadow;
 
     sf::Color col1, col2, col3;
-    bool shadow, multicolor;
+    bool shadow = false, multicolor = false;
 
     uint8_t press;
 

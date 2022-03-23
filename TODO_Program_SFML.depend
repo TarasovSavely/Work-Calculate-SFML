@@ -1,10 +1,11 @@
 # depslib dependency file v1.0
-1648055214 source:/home/tarasov_savely/Documents/CodeBlocks/TODO_Program_SFML/main.cpp
+1648060936 source:/home/tarasov_savely/Documents/CodeBlocks/TODO_Program_SFML/main.cpp
 	<SFML/Window.hpp>
 	<SFML/Graphics.hpp>
 	<iostream>
 	<string>
 	<ctime>
+	<vector>
 	<X11/Xlib.h>
 	<X11/Xutil.h>
 	"button.h"
@@ -12,6 +13,6 @@
 1648052649 /home/tarasov_savely/Documents/CodeBlocks/TODO_Program_SFML/round_rect.h
 	<cmath>
 
-1648054940 /home/tarasov_savely/Documents/CodeBlocks/TODO_Program_SFML/button.h
+1648055336 /home/tarasov_savely/Documents/CodeBlocks/TODO_Program_SFML/button.h
 	"round_rect.h"
 
