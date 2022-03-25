@@ -16,7 +16,7 @@ bool get_name (); // Получает имя окна в фокусе, запи�
 void processing_events (); // Обработка событий
 void redraw_win (); // Вывод в дисплей
 std::wstring calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
-bool find_str (wchar_t *str, wchar_t *f_str); // Ищет в строке-аргументе 1, строку-аргумент два
+bool find_str (std::wstring str, std::wstring f_str); // Ищет в строке-аргументе 1, строку-аргумент два
 int8_t find_win (std::wstring &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
 void question (); // Выводит вопрос о добвалении ока в какую-либо группу
 
@@ -41,7 +41,6 @@ std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calcula
 std::vector <int8_t> list_of_state_win {0,0}; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
 
 int handler (_XDisplay *d, XErrorEvent *ds) {
-    std::cout<<"Xerror"<<std::endl;
 return 0;
 }
 
@@ -93,8 +92,6 @@ int main(void) {
 }
 
 bool get_name() {
-    std::cout<<"I (get_name) start"<<std::endl;
-
     bool ret = false;
 
     Window get_focus;
@@ -137,7 +134,6 @@ bool get_name() {
         std::cout<<"ERR1"<<std::endl;
     }
 
-    std::cout<<"I (get_name) return " << (ret?"true.":"false.") << std::endl;
     return ret;
 }
 
@@ -225,15 +221,15 @@ std::wstring calc_percent (time_t val) {
     }
 }
 
-bool find_str (wchar_t *str, wchar_t *f_str) {
-    if (wcslen (str)<wcslen (f_str)) {
+bool find_str (std::wstring str, std::wstring f_str) {
+    if (str.size()<f_str.size()) {
         return false;
     }
 
     size_t stat_find = 0;
-    size_t n = wcslen(f_str);
+    size_t n = f_str.size();
 
-    for (size_t i = 0; i<=wcslen (str)-wcslen(f_str); i++) {
+    for (size_t i = 0; i<=str.size()-f_str.size(); i++) {
         while (str [i+stat_find] == f_str [stat_find]) {
             stat_find++;
             if (stat_find == n) {
@@ -247,7 +243,7 @@ bool find_str (wchar_t *str, wchar_t *f_str) {
 
 int8_t find_win (std::wstring &name) {
     for (size_t i = 0; i<list_of_name_win.size (); i++) {
-        if (list_of_name_win [i] == name) {
+        if (find_str(name,list_of_name_win [i])) {
             return list_of_state_win [i];
         }
     }

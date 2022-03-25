@@ -40,7 +40,9 @@
 			<Add library="sfml-system" />
 			<Add library="X11" />
 		</Linker>
+		<Unit filename="button.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="round_rect.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
