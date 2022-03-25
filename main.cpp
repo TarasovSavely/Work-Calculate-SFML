@@ -37,10 +37,17 @@ time_t t_work = 0, t_rest = 0, t_other = 0;
 int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
 
-std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calculate"}; // Лист имен окон
-std::vector <int8_t> list_of_state_win {0,0}; // Лист состояний окон (стоп-таймер, прочее, отдых, работа)
+// В следующих 3 вектроах хранится по одной характеристике каждой записи об отнесении окна к каой-либо группе:
+std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calculate", L"Question"}; // Лист имен окон
 
-int handler (_XDisplay *d, XErrorEvent *ds) {
+std::vector <int8_t> list_of_state_win {0,0,0}; // Лист группы окон (стоп-таймер:0, прочее:1, отдых:2, работа:3)
+
+std::vector <bool> substr_or_no {0,0}; // Имя данного окна это название целиком или только чатсь? (0-целиком,1-часть)
+// Это может пригодиться, когда нужно назначить какое либо приложение целиком в одну группу
+// Например, браузер (окно браузера может принимать бесчисленное кол-во имен, все их не внести)
+// Поэтому вносим только название браузера и все!
+
+int handler (_XDisplay *d, XErrorEvent *ds) { // Обработчик ошибок X11Lib, не обрабатывает входные данные за ненадобностью
 return 0;
 }
 
