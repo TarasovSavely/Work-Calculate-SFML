@@ -1,6 +1,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 
+#include <fstream>
 #include <iostream>
 #include <string>
 #include <ctime>
@@ -48,7 +49,7 @@ std::vector <bool> substr_or_no {0,0}; // Имя данного окна это 
 // Поэтому вносим только название браузера и все!
 
 int handler (_XDisplay *d, XErrorEvent *ds) { // Обработчик ошибок X11Lib, не обрабатывает входные данные за ненадобностью
-return 0;
+    return 0;
 }
 
 int main(void) {
@@ -250,7 +251,7 @@ bool find_str (std::wstring str, std::wstring f_str) {
 
 int8_t find_win (std::wstring &name) {
     for (size_t i = 0; i<list_of_name_win.size (); i++) {
-        if (find_str(name,list_of_name_win [i])) {
+        if (substr_or_no[i] ? find_str(name,list_of_name_win [i]) : (name==list_of_name_win [i])) {
             return list_of_state_win [i];
         }
     }
@@ -279,13 +280,13 @@ void question () {
     txt.setFillColor(sf::Color (0,0,0));
     txt.setPosition(sf::Vector2f (10.f,10.f));
 
-    sf::Text text_work, text_rest, text_other, text_StopTimer;
+    sf::Text text_work, text_rest, text_other, text_StopTimer, text_edit;
 
     text_work.setFont(font);
     text_work.setString("Work");
     text_work.setCharacterSize(17);
     text_work.setFillColor(sf::Color(0,0,0));
-    text_work.setPosition(sf::Vector2f (10.f,48.f));
+    text_work.setPosition(sf::Vector2f (11.f,49.f));
 
     text_rest.setFont(font);
     text_rest.setString("Rest");
@@ -297,18 +298,25 @@ void question () {
     text_other.setString("Other");
     text_other.setCharacterSize(17);
     text_other.setFillColor(sf::Color(0,0,0));
-    text_other.setPosition(sf::Vector2f (130.f,48.f));
+    text_other.setPosition(sf::Vector2f (122.f,49.f));
 
     text_StopTimer.setFont(font);
     text_StopTimer.setString("Stop-Timer");
     text_StopTimer.setCharacterSize(17);
     text_StopTimer.setFillColor(sf::Color(0,0,0));
-    text_StopTimer.setPosition(sf::Vector2f (200.f,48.f));
+    text_StopTimer.setPosition(sf::Vector2f (185.f,47.f));
 
-    Button btn_work (text_work.getGlobalBounds(),5.f,sf::Color (10,245,10)),
-           btn_rest (text_rest.getGlobalBounds(),5.f,sf::Color (245,10,10)),
-           btn_other(text_other.getGlobalBounds(),5.f,sf::Color (117,187,253)),
-           btn_stoptimer(text_StopTimer.getGlobalBounds(),5.f,sf::Color (255,223,0));
+    text_edit.setFont(font);
+    text_edit.setString("Edit name");
+    text_edit.setCharacterSize(17);
+    text_edit.setFillColor(sf::Color(0,0,0));
+    text_edit.setPosition(sf::Vector2f (292.f,49.f));
+
+    Button btn_work (text_work.getGlobalBounds(),5.f,sf::Color (10,245,10), 3, 4),
+           btn_rest (text_rest.getGlobalBounds(),5.f,sf::Color (245,10,10), 3, 5),
+           btn_other(text_other.getGlobalBounds(),5.f,sf::Color (117,187,253), 3, 4),
+           btn_stoptimer(text_StopTimer.getGlobalBounds(),5.f,sf::Color (255,223,0)),
+           btn_edit (text_edit.getGlobalBounds (), 5.f, sf::Color (120,120,120), 3, 4);
 
     while (que_win.isOpen()) {
         que_win.clear (sf::Color::White);
@@ -342,12 +350,15 @@ void question () {
         btn_rest.draw(que_win);
         btn_stoptimer.draw(que_win);
         btn_other.draw(que_win);
+        btn_edit.draw (que_win);
 
         que_win.draw (txt);
         que_win.draw (text_work);
         que_win.draw (text_rest);
         que_win.draw (text_other);
         que_win.draw (text_StopTimer);
+        que_win.draw (text_edit);
+
         que_win.display ();
 
         sf::Event event;
