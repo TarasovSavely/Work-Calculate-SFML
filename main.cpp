@@ -452,7 +452,9 @@ void edit () {
                         pos--;
                     }
                 } else if (event.key.code==sf::Keyboard::Backspace) {
-                    name.erase(pos,1);
+                    if (pos<name.size ()) {
+                        name.erase(pos,1);
+                    }
                 }
                 break;
             default:
