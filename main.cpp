@@ -17,9 +17,11 @@ bool get_name (); // Получает имя окна в фокусе, запи�
 void processing_events (); // Обработка событий
 void redraw_win (); // Вывод в дисплей
 std::wstring calc_percent (time_t val); // Вычисляет сколько процентов от всего времени состовляет val, записывает в строку
-bool find_str (std::wstring str, std::wstring f_str); // Ищет в строке-аргументе 1, строку-аргумент два
 int8_t find_win (std::wstring &name); // Ищет в окно с именем name в списках, есл инаходит - возвращает тип окна. Если нет, то -1
-void question (); // Выводит вопрос о добвалении ока в какую-либо группу
+void question (); // Выводит вопрос о добвалении окна в какую-либо группу
+void edit (); // Выводит окно изменения имени окна
+void readfile (); // Читает файл WindowGroup.conf и записывает информацию по вектроам
+void writefile (); // Записывает файл WindowGroup.conf и записывает туда информацию из векторов
 
 Window rwin;
 Window pwin;
@@ -39,11 +41,11 @@ int m_x,m_y;
 bool m_pr; // Мышь, x, y, pressed
 
 // В следующих 3 вектроах хранится по одной характеристике каждой записи об отнесении окна к каой-либо группе:
-std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calculate", L"Question"}; // Лист имен окон
+std::vector <std::wstring> list_of_name_win {L"TODO_Program_SFML",L"Work calculate", L"Question", L"Edit"}; // Лист имен окон
 
-std::vector <int8_t> list_of_state_win {0,0,0}; // Лист группы окон (стоп-таймер:0, прочее:1, отдых:2, работа:3)
+std::vector <int8_t> list_of_state_win {0,0,0,0}; // Лист группы окон (стоп-таймер:0, прочее:1, отдых:2, работа:3)
 
-std::vector <bool> substr_or_no {0,0}; // Имя данного окна это название целиком или только чатсь? (0-целиком,1-часть)
+std::vector <int8_t> substr_or_no {0,0,0,0}; // Имя данного окна это название целиком или только чатсь? (0-целиком,1-часть)
 // Это может пригодиться, когда нужно назначить какое либо приложение целиком в одну группу
 // Например, браузер (окно браузера может принимать бесчисленное кол-во имен, все их не внести)
 // Поэтому вносим только название браузера и все!
@@ -66,12 +68,13 @@ int main(void) {
     setlocale(LC_ALL, ""); // Адаптация под русский и не только
     disp = XOpenDisplay(NULL); // Устанавливаем связь с X-сервером
 
+    readfile ();
+
     while (window.isOpen()) {
 
         tmr = time(NULL);
 
         if (tmr!=l_tmr && get_name ()) { // Получаем имя окна в фокусе
-            std::wcout<<name.c_str()<<std::endl;
             l_tmr = tmr;
             switch (find_win(name)) {
             case 1:
@@ -150,6 +153,7 @@ void processing_events () {
     while (window.pollEvent(event)) {
         switch (event.type) {
         case sf::Event::Closed:
+            writefile();
             window.close ();
             break;
         case sf::Event::LostFocus:
@@ -229,29 +233,9 @@ std::wstring calc_percent (time_t val) {
     }
 }
 
-bool find_str (std::wstring str, std::wstring f_str) {
-    if (str.size()<f_str.size()) {
-        return false;
-    }
-
-    size_t stat_find = 0;
-    size_t n = f_str.size();
-
-    for (size_t i = 0; i<=str.size()-f_str.size(); i++) {
-        while (str [i+stat_find] == f_str [stat_find]) {
-            stat_find++;
-            if (stat_find == n) {
-                return true;
-            }
-        }
-        stat_find = 0;
-    }
-    return false;
-}
-
 int8_t find_win (std::wstring &name) {
     for (size_t i = 0; i<list_of_name_win.size (); i++) {
-        if (substr_or_no[i] ? find_str(name,list_of_name_win [i]) : (name==list_of_name_win [i])) {
+        if (substr_or_no[i] ? (name.find(list_of_name_win [i])!=std::string::npos) : (name==list_of_name_win [i])) {
             return list_of_state_win [i];
         }
     }
@@ -260,25 +244,29 @@ int8_t find_win (std::wstring &name) {
 
 void question () {
     sf::RenderWindow que_win (sf::VideoMode(390, 75), "Question", sf::Style::Default^sf::Style::Resize);
-    window.setFramerateLimit(120);
+    que_win.setFramerateLimit(120);
 
     sf::Text txt;
     int m_x = 0, m_y = 0, m_pr = 0;
 
     list_of_name_win.push_back(name);
+    substr_or_no.push_back (0);
 
     txt.setFont(font);
-    bool large = false;
+    bool large;
+
     if (name.size ()>11) {
-        name.resize(11);
         large = true;
+    } else {
+        large = false;
     }
-    std::wstring str = L"The \"" + std::wstring(name.begin(), name.end()) + (large?L"...":L"") + L"\" window is not assigned to any group.\n\r"
+    std::wstring str = L"The \"" + (large?std::wstring (name.begin (),name.begin ()+11):std::wstring(name.begin(), name.end())) + (large?L"...":L"") + L"\" window is not assigned to any group.\n\r"
                        "Which group should he be assigned to?";
     txt.setString (str.c_str());
     txt.setCharacterSize(14);
     txt.setFillColor(sf::Color (0,0,0));
     txt.setPosition(sf::Vector2f (10.f,10.f));
+
 
     sf::Text text_work, text_rest, text_other, text_StopTimer, text_edit;
 
@@ -324,26 +312,40 @@ void question () {
         if (btn_work.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(3);
             que_win.close ();
-            usleep (1000);
             return;
         }
         if (btn_rest.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(2);
             que_win.close ();
-            usleep (1000);
             return;
         }
         if (btn_stoptimer.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(0);
             que_win.close ();
-            usleep (1000);
             return;
         }
         if (btn_other.is_pressed(m_x,m_y,m_pr)) {
             list_of_state_win.push_back(1);
             que_win.close ();
-            usleep (1000);
             return;
+        }
+
+        if (btn_edit.is_pressed(m_x,m_y,m_pr)) {
+            edit ();
+            substr_or_no [substr_or_no.size ()-1] = 1;
+            if (name.size ()>11) {
+                large = true;
+            } else {
+                large = false;
+            }
+            std::wstring str = L"The \"" + (large?std::wstring (name.begin (),name.begin ()+11):std::wstring(name.begin(), name.end())) + (large?L"...":L"") + L"\" window is not assigned to any group.\n\r"
+                               "Which group should he be assigned to?";
+            txt.setString (str.c_str());
+            txt.setCharacterSize(14);
+            txt.setFillColor(sf::Color (0,0,0));
+            txt.setPosition(sf::Vector2f (10.f,10.f));
+
+            list_of_name_win [list_of_name_win.size ()-1] = name;
         }
 
         btn_work.draw(que_win);
@@ -367,7 +369,6 @@ void question () {
             case sf::Event::Closed:
                 list_of_state_win.push_back(0);
                 que_win.close ();
-                usleep (1000);
                 break;
             case sf::Event::MouseButtonPressed:
                 if (event.mouseButton.button == sf::Mouse::Left) {
@@ -391,3 +392,115 @@ void question () {
     }
 }
 
+void edit () {
+    sf::RenderWindow win_edit (sf::VideoMode(390, 37), "Edit", sf::Style::Default^sf::Style::Resize);
+    win_edit.setFramerateLimit(120);
+
+    std::size_t pos = 0;
+
+    while (win_edit.isOpen()) {
+        win_edit.clear (sf::Color (255,255,255));
+
+        sf::Text text_edit;
+        text_edit.setFont(font);
+        text_edit.setString(L">"+name.substr(pos,44));
+        text_edit.setCharacterSize(17);
+        text_edit.setFillColor(sf::Color(0,0,0));
+        text_edit.setPosition(sf::Vector2f (10.f,10.f));
+
+        win_edit.draw(text_edit);
+
+        win_edit.display();
+
+        sf::Event event;
+        while (win_edit.pollEvent(event)) {
+            switch (event.type) {
+            case sf::Event::Closed:
+                win_edit.close ();
+                break;
+            case sf::Event::MouseButtonPressed:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    m_pr = true;
+                }
+                break;
+            case sf::Event::MouseButtonReleased:
+                if (event.mouseButton.button == sf::Mouse::Left) {
+                    m_pr = false;
+                }
+                break;
+            case sf::Event::MouseMoved:
+                m_x = event.mouseMove.x;
+                m_y = event.mouseMove.y;
+                break;
+            case sf::Event::TextEntered:
+                if (event.text.unicode!=8) {
+                    name [pos] = event.text.unicode;
+                    pos++;
+                    if (pos==name.size()) {
+                        pos = name.size()-1;
+                    }
+                }
+                break;
+            case sf::Event::KeyPressed:
+                if (event.key.code==sf::Keyboard::Right) {
+                    pos++;
+                    if (pos==name.size()) {
+                        pos = name.size()-1;
+                    }
+                } else if (event.key.code==sf::Keyboard::Left) {
+                    if (pos>0) {
+                        pos--;
+                    }
+                } else if (event.key.code==sf::Keyboard::Backspace) {
+                    name.erase(pos,1);
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+}
+
+void readfile () {
+    std::ifstream fin ("WindowGroup.conf", std::ios_base::binary);
+    if (fin.is_open ()) {
+        size_t num;
+        fin.read ((char*)&num, sizeof (size_t));
+        for (size_t i = 4; i<num; i++) {
+            size_t sz_txt;
+            fin.read((char*)&sz_txt, sizeof (size_t));
+            int8_t p1;
+            fin.read((char*)&p1, 1);
+            list_of_state_win.push_back (p1);
+
+            fin.read((char*)&p1,1);
+            substr_or_no.push_back (p1);
+
+            wchar_t *name = new wchar_t [sz_txt+1];
+            name [sz_txt] = '\0';
+            fin.read((char*)name, sizeof (wchar_t)*sz_txt);
+            list_of_name_win.push_back (name);
+            delete [] name;
+        }
+        fin.close ();
+    }
+}
+
+void writefile () {
+    std::ofstream fout ("WindowGroup.conf", std::ios_base::binary);
+    if (fout.is_open ()) {
+        size_t sz = list_of_name_win.size ();
+        fout.write ((char*) &sz,sizeof (size_t));
+        for (size_t i = 4; i<list_of_name_win.size (); i++) {
+            sz = list_of_name_win[i].size ();
+            fout.write((char*)&sz, sizeof (size_t));
+            fout.write((char*)&(list_of_state_win[i]), 1);
+            fout.write((char*)&(substr_or_no[i]), 1);
+            fout.write((char*)list_of_name_win [i].c_str (), sizeof (wchar_t)*list_of_name_win [i].size());
+        }
+        fout.close ();
+    } else {
+        std::wcout<<"I can't create file WindowGroup.conf"<<std::endl;
+    }
+}

@@ -15,7 +15,7 @@ Window names are stored in a list. The list consists of entries. Each entry cont
 + The name of the window or part of it.
 + Number of the group to which the window belongs.
 + This property determines what is stored in property 1: either this is the entire window name or part of the window name.
-All three properties can be configured in the "Question" window (you can change property 3 and 1 by clicking on the Edit name button in the "Question" window).
+All three properties can be configured in the "Question" window (you can change property 1 by clicking on the Edit name button in the "Question" window, while property 3 will change automatically).
 
 ## Русская документация
 
@@ -32,4 +32,5 @@ All three properties can be configured in the "Question" window (you can change 
 + Имя окна или его части.
 + Номер группы к которой относится окно.
 + Это свойство определяет, что харнится в свойстве 1: либо это имя окна целиком, либо часть имени окна.
-Все три свойства можно настроить в окне "Вопроса" (изменить свойство 3 и 1 можно нажав на кнопку Edit name в окне "Вопроса").
+Все три свойства можно настроить в окне "Вопроса" (изменить свойство 1 можно нажав на кнопку Edit name в окне "Вопроса", при этом свойство 3 изменится автоматически).
+
